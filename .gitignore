@@ -27,6 +27,9 @@ gmail_token.json
 logs/
 *.log
 
+node_modules/
+
+
 # Data exports
 data/*.csv
 data/*.json
