@@ -11,12 +11,12 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGO_DB_URL = process.env.MONGO_DB_URL;
 let db;
 
 const connectDB = async () => {
   try {
-    const client = new MongoClient(MONGODB_URI);
+    const client = new MongoClient(MONGO_DB_URL);
     await client.connect();
     db = client.db('leadgen');
     console.log('✅ Connected to MongoDB');

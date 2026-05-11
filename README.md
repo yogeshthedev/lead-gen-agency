@@ -68,7 +68,7 @@ lead-gen-agency/
 ```
 → mongodb.com/cloud/atlas
 → Create account & free cluster (M0)
-→ Copy connection string (MONGODB_URI)
+→ Copy connection string (MONGO_DB_URL)
 ```
 
 ### 2. Deploy to Vercel
@@ -221,7 +221,7 @@ python -m http.server 8000
 Copy `.env.example` → `.env` and fill in:
 
 ```
-MONGODB_URI=...           # MongoDB connection
+MONGO_DB_URL=...          # MongoDB connection
 GOOGLE_SHEET_ID=...       # Your sheet ID
 GOOGLE_CREDENTIALS_JSON=  # Service account JSON
 BREVO_API_KEY=...         # Email API key
@@ -261,7 +261,7 @@ TARGET_BUSINESS=...       # Business type
 - Verify Vercel is deployed
 
 **Scraper doesn't sync to MongoDB**
-- Check MONGODB_URI is correct
+- Check MONGO_DB_URL is correct
 - Verify secrets in GitHub Actions
 
 **Google Sheets not updating**

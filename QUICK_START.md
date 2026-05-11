@@ -17,14 +17,14 @@
 → Go to mongodb.com/cloud/atlas
 → Create free account
 → Create free cluster (M0)
-→ Get connection string (Copy the MONGODB_URI)
+→ Get connection string (Copy the MONGO_DB_URL)
 ```
 
 ### 2️⃣ Deploy to Vercel (2 min)
 ```
 → Go to vercel.com
 → Import your GitHub repo
-→ Add environment variables (MONGODB_URI, GOOGLE_SHEET_ID, etc.)
+→ Add environment variables (MONGO_DB_URL, GOOGLE_SHEET_ID, etc.)
 → Click Deploy
 → Copy your Vercel URL (e.g., https://your-project.vercel.app)
 ```
@@ -66,7 +66,7 @@ Git push!
 
 ### **MongoDB Atlas:**
 ```
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/leadgen
+MONGO_DB_URL=mongodb+srv://user:pass@cluster.mongodb.net/leadgen
 ```
 
 ### **Google (Sheets + Gmail):**
