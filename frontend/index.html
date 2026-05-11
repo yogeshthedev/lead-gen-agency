@@ -169,29 +169,19 @@ tr:last-child td{border-bottom:none}
 
 <!-- SCRAPER -->
 <div class="page" id="page-scraper">
-  <div class="ph"><div class="pt">Scraper</div><div class="ps">Google Maps recommended — gives Maps URL, phone, and website</div></div>
-  <div id="sc-ban" class="ban"><div class="spin"></div><span id="sc-step">Working...</span></div>
-  <div class="card">
-    <div class="cl">Target</div>
-    <div class="fr">
-      <div class="field"><label>City</label><input id="sc-city" value="Jaipur"></div>
-      <div class="field"><label>Business Type</label><input id="sc-biz" value="chartered accountants"></div>
+  <div class="ph"><div class="pt">Scraper</div><div class="ps">Run locally from your terminal (not available on cloud dashboard)</div></div>
+  <div class="card" style="background:var(--amb-bg);border:1px solid var(--amb-b);color:var(--amb)">
+    <div style="font-size:13px;line-height:1.8">
+      <div style="font-weight:600;margin-bottom:8px">ℹ️ Scraper must run on your local machine</div>
+      <p style="margin-bottom:12px">The scraper accesses Google Maps and JustDial, which requires local Playwright browser automation. This can't run on cloud servers.</p>
+      <p style="margin-bottom:12px"><strong>To scrape leads:</strong></p>
+      <div style="background:rgba(0,0,0,0.1);border-radius:4px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:12px;margin-bottom:12px;overflow-x:auto">
+cd D:/Agency/lead-gen-agency<br>source venv/Scripts/activate<br>python main.py
+      </div>
+      <p style="margin-bottom:8px">Then follow the prompts to configure scraping parameters (city, business type, source).</p>
+      <p style="font-size:12px;color:var(--ink3)">✅ Leads will automatically sync to MongoDB and appear in this dashboard within a few seconds</p>
     </div>
-    <div class="fr">
-      <div class="field"><label>Max Leads</label><input id="sc-lim" type="number" value="30" min="5" max="100"></div>
-      <div class="field"><label>Source</label><div style="margin-top:6px"><div class="seg">
-        <button class="sb" id="src-jd" onclick="setSrc('justdial')">JustDial</button>
-        <button class="sb on" id="src-gm" onclick="setSrc('maps')">Google Maps</button>
-        <button class="sb" id="src-bo" onclick="setSrc('both')">Both</button>
-      </div></div></div>
-    </div>
-    <div class="brow">
-      <button class="btn btn-p" id="btn-sc" onclick="startScrape()">Start Scraping</button>
-      <span class="bdg b-idle" id="sc-bdg">idle</span>
-    </div>
-    <div class="pb"><div class="pf" id="sc-pf"></div></div>
   </div>
-  <div class="card"><div class="cl">Log</div><div class="term" id="sc-log"><span class="td">waiting...</span></div></div>
 </div>
 
 <!-- EMAILS -->
