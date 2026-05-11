@@ -482,6 +482,39 @@ function callApi(path, opts, cb) {
     .catch(function(){ cb({error:'Cannot reach API. Run: python api/server.py'}); });
 }
 
+function normalizeLead(raw) {
+  if (!raw) return {};
+  var idVal = raw.id || raw._id || '';
+  if (idVal && typeof idVal === 'object' && idVal.$oid) idVal = idVal.$oid;
+  var lead = {
+    id: idVal ? String(idVal) : '',
+    'Business Name': raw['Business Name'] || raw.business_name || '',
+    'Owner / Contact': raw['Owner / Contact'] || raw.owner_contact || '',
+    'Email': raw['Email'] || raw.email || '',
+    'Phone': raw['Phone'] || raw.phone || '',
+    'Website': raw['Website'] || raw.website || '',
+    'Maps URL': raw['Maps URL'] || raw.maps_url || '',
+    'City': raw['City'] || raw.city || '',
+    'Category': raw['Category'] || raw.category || '',
+    'Source': raw['Source'] || raw.source || '',
+    'Date Scraped': raw['Date Scraped'] || raw.date_scraped || '',
+    'Email Status': raw['Email Status'] || raw.email_status || 'not_sent',
+    'Last Email Date': raw['Last Email Date'] || raw.last_email_date || '',
+    'Follow Up Count': raw['Follow Up Count'] || raw.follow_up_count || 0,
+    'Notes': raw['Notes'] || raw.notes || '',
+    'WhatsApp Status': raw['WhatsApp Status'] || raw.wa_status || '',
+    'WhatsApp Date': raw['WhatsApp Date'] || raw.wa_date || '',
+    'WhatsApp Count': raw['WhatsApp Count'] || raw.wa_count || 0,
+    'Rating': raw['Rating'] || raw.rating || '',
+    'Review Count': raw['Review Count'] || raw.review_count || '',
+    'Has Website': raw['Has Website'] || raw.has_website || '',
+    'Website Quality': raw['Website Quality'] || raw.website_quality || '',
+    'Lead Score': raw['Lead Score'] || raw.lead_score || 0,
+    'Response': raw['Response'] || raw.response || 'new'
+  };
+  return Object.assign({}, raw, lead);
+}
+
 function loadStats() {
   callApi('/leads/stats', {}, function(s) {
     if (s.error) return;
@@ -514,7 +547,7 @@ function loadRecentLeads() {
   callApi('/leads', {}, function(d) {
     var tb = document.getElementById('recent-body');
     if (d.error) { tb.innerHTML = '<tr><td colspan="7" class="empty">' + d.error + '</td></tr>'; return; }
-    var leads = d.leads || [];
+    var leads = (d.leads || []).map(normalizeLead);
     if (!leads.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">No leads yet</td></tr>'; return; }
 
     leads.sort(function(a, b) { return (b.id || 0) - (a.id || 0); });
@@ -650,7 +683,7 @@ function resetTmpl() {
 function loadLeads() {
   callApi('/leads', {}, function(d) {
     if (d.error) { document.getElementById('lbody').innerHTML = '<tr><td colspan="14" class="empty">' + d.error + '</td></tr>'; return; }
-    allLeads = d.leads || [];
+    allLeads = (d.leads || []).map(normalizeLead);
     var days = [];
     allLeads.forEach(function(l) { var ds = l['Date Scraped']; if (ds && days.indexOf(ds) < 0) days.push(ds); });
     days.sort();
@@ -779,7 +812,7 @@ function saveStatus() {
 function loadPipeline() {
   callApi('/leads', {}, function(d) {
     if (d.error) return;
-    var leads = d.leads || [];
+    var leads = (d.leads || []).map(normalizeLead);
     var rep = leads.filter(function(l){ return l['Email Status'] === 'replied'; });
     var int = leads.filter(function(l){ return l['Email Status'] === 'interested'; });
     var clo = leads.filter(function(l){ return l['Email Status'] === 'closed'; });
@@ -927,7 +960,7 @@ function loadWa() {
   checkWa();
   callApi('/leads', {}, function(d) {
     if (d.error || !d.leads) return;
-    var wl = d.leads.filter(function(l) {
+    var wl = d.leads.map(normalizeLead).filter(function(l) {
       var ws = l['WhatsApp Status'] || '';
       return l['Phone'] && ws !== 'wa_done' && ws !== 'wa_not_found';
     }).slice(0, 50);
