@@ -1,0 +1,35 @@
+# Python files (not needed for Node.js deployment)
+requirements.txt
+*.py
+config.py
+venv/
+env/
+.venv
+
+# Local dev
+.env.local
+.env*.local
+
+# Data and logs
+data/
+logs/
+*.db
+*.db-journal
+
+# OS/IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Testing
+test_*.py
+tests/
+
+# GitHub Actions
+.github/
+
+# Credentials
+credentials.json
+gmail_credentials.json
+gmail_token.json
