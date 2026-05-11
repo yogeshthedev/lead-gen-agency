@@ -139,6 +139,11 @@ app.get('/api/leads/stats', async (req, res) => {
   }
 });
 
+async function syncSheetsIfEnabled() {
+  if (!process.env.GOOGLE_SHEET_ID) return;
+  await syncToGoogleSheets();
+}
+
 // Update lead status
 app.post('/api/leads/update-status', async (req, res) => {
   try {
@@ -162,11 +167,7 @@ app.post('/api/leads/update-status', async (req, res) => {
       return res.status(404).json({ error: 'Lead not found' });
     }
 
-    // Sync to Google Sheets
-    if (process.env.GOOGLE_SHEET_ID) {
-      syncToGoogleSheets().catch(err => console.error('Sheets sync error:', err));
-    }
-
+    await syncSheetsIfEnabled();
     res.json({ ok: true });
   } catch (err) {
     console.error('Error updating status:', err);
@@ -183,19 +184,45 @@ app.post('/api/leads/update-notes', async (req, res) => {
       return res.status(400).json({ error: 'lead_id required' });
     }
 
-    await db.collection('leads').updateOne(
+    const result = await db.collection('leads').updateOne(
       { _id: new ObjectId(lead_id) },
       { $set: { notes: notes || '' } }
     );
 
-    // Sync to Google Sheets
-    if (process.env.GOOGLE_SHEET_ID) {
-      syncToGoogleSheets().catch(err => console.error('Sheets sync error:', err));
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Lead not found' });
     }
 
+    await syncSheetsIfEnabled();
     res.json({ ok: true });
   } catch (err) {
     console.error('Error updating notes:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update lead response value
+app.post('/api/leads/update-response', async (req, res) => {
+  try {
+    const { lead_id, response } = req.body;
+
+    if (!lead_id) {
+      return res.status(400).json({ error: 'lead_id required' });
+    }
+
+    const result = await db.collection('leads').updateOne(
+      { _id: new ObjectId(lead_id) },
+      { $set: { response: response || 'new' } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+
+    await syncSheetsIfEnabled();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Error updating response:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -209,16 +236,16 @@ app.post('/api/leads/update', async (req, res) => {
       return res.status(400).json({ error: 'lead_id and updates required' });
     }
 
-    await db.collection('leads').updateOne(
+    const result = await db.collection('leads').updateOne(
       { _id: new ObjectId(lead_id) },
       { $set: updates }
     );
 
-    // Sync to Google Sheets
-    if (process.env.GOOGLE_SHEET_ID) {
-      syncToGoogleSheets().catch(err => console.error('Sheets sync error:', err));
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Lead not found' });
     }
 
+    await syncSheetsIfEnabled();
     res.json({ ok: true });
   } catch (err) {
     console.error('Error updating lead:', err);
@@ -241,7 +268,7 @@ async function syncToGoogleSheets() {
     const leads = await db.collection('leads').find({}).toArray();
 
     const values = [
-      ['Business Name', 'Owner / Contact', 'Email', 'Phone', 'Website', 'Maps URL', 'City', 'Category', 'Source', 'Date Scraped', 'Email Status', 'Last Email Date', 'Follow Up Count', 'Notes', 'Rating', 'Review Count', 'Lead Score'],
+      ['Business Name', 'Owner / Contact', 'Email', 'Phone', 'Website', 'Maps URL', 'City', 'Category', 'Source', 'Date Scraped', 'Email Status', 'Last Email Date', 'Follow Up Count', 'Notes', 'Rating', 'Review Count', 'Lead Score', 'Response'],
       ...leads.map(l => [
         l.business_name || '',
         l.owner_contact || '',
@@ -259,7 +286,8 @@ async function syncToGoogleSheets() {
         l.notes || '',
         l.rating || '',
         l.review_count || '',
-        l.lead_score || 0
+        l.lead_score || 0,
+        l.response || 'new'
       ])
     ];
 
