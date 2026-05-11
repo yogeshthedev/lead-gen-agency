@@ -64,7 +64,7 @@ COL_WA_STATUS     = 15  # O
 COL_WA_DATE       = 16  # P
 COL_WA_COUNT      = 17  # Q
 # ── MongoDB (replaces SQLite) ──────────────────
-MONGODB_URI = os.getenv("MONGODB_URI", "mongodb+srv://user:password@cluster.mongodb.net/leadgen")
+MONGO_DB_URL = os.getenv("MONGO_DB_URL", "mongodb+srv://user:password@cluster.mongodb.net/leadgen")
 
 # ── Google Credentials (for Sheets sync) ──────
 GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON", "")

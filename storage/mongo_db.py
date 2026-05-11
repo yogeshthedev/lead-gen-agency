@@ -16,8 +16,8 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 
 # MongoDB Connection
-MONGODB_URI = os.getenv("MONGODB_URI", "mongodb+srv://user:password@cluster.mongodb.net/leadgen")
-client = MongoClient(MONGODB_URI)
+MONGO_DB_URL = os.getenv("MONGO_DB_URL", "mongodb+srv://user:password@cluster.mongodb.net/leadgen")
+client = MongoClient(MONGO_DB_URL)
 db = client.get_database('leadgen')
 
 # Collections
