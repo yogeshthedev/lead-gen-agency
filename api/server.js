@@ -193,8 +193,21 @@ app.post('/api/leads/update-notes', async (req, res) => {
       return res.status(404).json({ error: 'Lead not found' });
     }
 
-    await syncSheetsIfEnabled();
-    res.json({ ok: true });
+    console.log(`✅ Updated notes for lead ${lead_id}`);
+    
+    if (process.env.GOOGLE_SHEET_ID && process.env.GOOGLE_CREDENTIALS_JSON) {
+      try {
+        await syncToGoogleSheets();
+        console.log('✅ Sheet sync completed');
+        res.json({ ok: true, synced: true });
+      } catch (syncErr) {
+        console.error('Sheet sync error:', syncErr.message);
+        res.json({ ok: true, synced: false, syncError: syncErr.message });
+      }
+    } else {
+      console.warn('Sheet sync skipped: missing GOOGLE_SHEET_ID or GOOGLE_CREDENTIALS_JSON');
+      res.json({ ok: true, synced: false, reason: 'Missing sheet credentials' });
+    }
   } catch (err) {
     console.error('Error updating notes:', err);
     res.status(500).json({ error: err.message });
@@ -256,8 +269,24 @@ app.post('/api/leads/update', async (req, res) => {
 // Google Sheets Sync function
 async function syncToGoogleSheets() {
   try {
+    console.log('🔄 Starting sheet sync...');
+    
+    if (!process.env.GOOGLE_SHEET_ID) {
+      throw new Error('GOOGLE_SHEET_ID not set');
+    }
+    if (!process.env.GOOGLE_CREDENTIALS_JSON) {
+      throw new Error('GOOGLE_CREDENTIALS_JSON not set');
+    }
+
     const { google } = require('googleapis');
-    const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON || '{}');
+    let credentials;
+    
+    try {
+      credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+      console.log('✅ Credentials parsed');
+    } catch (parseErr) {
+      throw new Error(`Invalid GOOGLE_CREDENTIALS_JSON: ${parseErr.message}`);
+    }
     
     const auth = new google.auth.GoogleAuth({
       credentials,
@@ -265,7 +294,10 @@ async function syncToGoogleSheets() {
     });
 
     const sheets = google.sheets({ version: 'v4', auth });
+    console.log('✅ Auth initialized');
+    
     const leads = await db.collection('leads').find({}).toArray();
+    console.log(`✅ Fetched ${leads.length} leads from MongoDB`);
 
     const values = [
       ['Business Name', 'Owner / Contact', 'Email', 'Phone', 'Website', 'Maps URL', 'City', 'Category', 'Source', 'Date Scraped', 'Email Status', 'Last Email Date', 'Follow Up Count', 'Notes', 'Rating', 'Review Count', 'Lead Score', 'Response'],
@@ -291,16 +323,19 @@ async function syncToGoogleSheets() {
       ])
     ];
 
-    await sheets.spreadsheets.values.update({
+    console.log(`📝 Updating sheet with ${values.length} rows (1 header + ${leads.length} leads)`);
+
+    const updateRes = await sheets.spreadsheets.values.update({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       range: 'Sheet1!A1',
       valueInputOption: 'RAW',
       requestBody: { values }
     });
 
-    console.log('✅ Synced to Google Sheets');
+    console.log(`✅ Synced to Google Sheets: ${updateRes.data.updatedRows} rows updated`);
   } catch (err) {
-    console.error('Error syncing to Sheets:', err);
+    console.error('❌ Sheet sync failed:', err.message);
+    throw err;
   }
 }
 
