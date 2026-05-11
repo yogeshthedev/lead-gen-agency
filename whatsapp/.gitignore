@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+node_modules/
+
+
+# Database
+data/leads.db
+data/leads.db-journal
+
+# Credentials (NEVER commit these)
+credentials.json
+gmail_credentials.json
+gmail_token.json
+
+# Logs
+logs/
+*.log
+
+# Data exports
+data/*.csv
+data/*.json
+data/justdial_debug.html
+data/maps_debug.html
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Browser session
+whatsapp/session/

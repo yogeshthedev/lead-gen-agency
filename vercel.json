@@ -1,0 +1,18 @@
+{
+  "buildCommand": "npm install",
+  "outputDirectory": "frontend",
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "GOOGLE_SHEET_ID": "@google_sheet_id",
+    "GOOGLE_CREDENTIALS_JSON": "@google_credentials_json",
+    "BREVO_API_KEY": "@brevo_api_key",
+    "FROM_EMAIL": "@from_email",
+    "FROM_NAME": "@from_name"
+  },
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
+}

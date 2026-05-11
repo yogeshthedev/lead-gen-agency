@@ -1,0 +1,55 @@
+name: Daily Lead Gen Scraper
+
+on:
+  schedule:
+    # Runs daily at 9 AM UTC (adjust time as needed)
+    - cron: '0 9 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Create .env file
+        run: |
+          cat > .env << ENVEOF
+          BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+          FROM_EMAIL=${{ secrets.FROM_EMAIL }}
+          FROM_NAME=${{ secrets.FROM_NAME }}
+          GOOGLE_SHEET_ID=${{ secrets.GOOGLE_SHEET_ID }}
+          YOUR_NAME=${{ secrets.YOUR_NAME }}
+          YOUR_CAL_LINK=${{ secrets.YOUR_CAL_LINK }}
+          YOUR_WEBSITE=${{ secrets.YOUR_WEBSITE }}
+          TARGET_CITY=${{ secrets.TARGET_CITY }}
+          TARGET_BUSINESS=${{ secrets.TARGET_BUSINESS }}
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          GOOGLE_CREDENTIALS_JSON=${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          EXPORT_TO_SHEETS=1
+          ENVEOF
+
+      - name: Run scraper & email pipeline
+        run: python main.py
+
+      - name: Upload logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-logs
+          path: logs/
+          retention-days: 7
