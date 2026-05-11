@@ -13,6 +13,7 @@ app.use(express.json());
 // MongoDB Connection
 const MONGO_DB_URL = process.env.MONGO_DB_URL;
 let db;
+let dbConnectPromise = null;
 
 const connectDB = async () => {
   try {
@@ -29,9 +30,26 @@ const connectDB = async () => {
     return client;
   } catch (err) {
     console.error('❌ MongoDB connection failed:', err);
-    process.exit(1);
+    throw err;
   }
 };
+
+const ensureDB = async () => {
+  if (db) return;
+  if (!dbConnectPromise) {
+    dbConnectPromise = connectDB();
+  }
+  await dbConnectPromise;
+};
+
+app.use(async (req, res, next) => {
+  try {
+    await ensureDB();
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Database connection failed' });
+  }
+});
 
 // Health check
 app.get('/health', (req, res) => {
@@ -258,9 +276,12 @@ async function syncToGoogleSheets() {
   }
 }
 
-// Start server
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+if (require.main === module) {
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   });
-});
+}
+
+module.exports = app;
