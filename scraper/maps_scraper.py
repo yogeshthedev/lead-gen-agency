@@ -117,6 +117,15 @@ def _extract_details_from_panel(page) -> dict:
         href = site_el.get_attribute("href") or ""
         if _is_real_url(href):
             details["website"] = href
+            
+    # Aggressive fallback: scan all anchor tags in the panel for non-Google URLs
+    if not details["website"]:
+        links = page.query_selector_all("a[href]")
+        for link in links:
+            href = link.get_attribute("href") or ""
+            if _is_real_url(href):
+                details["website"] = href
+                break
 
     # Rating and reviews from aria-labels
     rating_el = page.query_selector('span[aria-label*="stars"], div[aria-label*="stars"]')

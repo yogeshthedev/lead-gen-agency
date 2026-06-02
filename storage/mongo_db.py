@@ -10,7 +10,6 @@ from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from bson.objectid import ObjectId
 
-from config import SHEET_HEADERS
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -22,6 +21,7 @@ db = client.get_database('leadgen')
 
 # Collections
 leads_collection = db['leads']
+email_history_collection = db['email_history']
 
 # Map fields
 DB_COLUMNS = [
@@ -49,6 +49,7 @@ DB_COLUMNS = [
     "lead_score",
     "response",
     "normalized_name",
+    "social_links",
 ]
 
 SHEET_TO_DB = {
@@ -75,6 +76,7 @@ SHEET_TO_DB = {
     "Website Quality": "website_quality",
     "Lead Score": "lead_score",
     "Response": "response",
+    "Social Links": "social_links",
 }
 
 DB_TO_SHEET = {v: k for k, v in SHEET_TO_DB.items()}
@@ -107,23 +109,46 @@ def _lead_to_db_row(lead: Dict) -> Dict:
     return row
 
 
-def lead_exists(email: str, phone: str, name: str) -> bool:
-    """Check if lead already exists."""
+def lead_exists(email: str, phone: str, name: str, website: str, city: str) -> bool:
+    """Check if lead already exists. Uses strict Phone/Email/Website or Name+City match."""
+    import re
     email = (email or "").strip().lower()
-    phone = (phone or "").strip()
-    name_norm = _normalize_name(name)
-
-    query = {
-        "$or": [
-            {"phone": phone} if phone else {},
-            {"email": {"$regex": f"^{email}$", "$options": "i"}} if email else {},
-            {"normalized_name": name_norm} if name_norm else {}
-        ]
-    }
     
-    # Remove empty dicts
-    query["$or"] = [q for q in query["$or"] if q]
+    # Strictly strip phone to digits
+    phone = re.sub(r'\D', '', (phone or ""))
+    if phone.startswith("91") and len(phone) > 10:
+        phone = phone[2:]
+    elif phone.startswith("0") and len(phone) > 10:
+        phone = phone[1:]
+        
+    website = (website or "").strip().lower()
+    name_norm = _normalize_name(name)
+    city_norm = (city or "").strip().lower()
 
+    or_conditions = []
+    
+    if phone:
+        # Match against phone in db by regex since it might have spaces in DB
+        or_conditions.append({"phone": {"$regex": f"{phone}$"}})
+    if email:
+        or_conditions.append({"email": {"$regex": f"^{email}$", "$options": "i"}})
+    if website and "google" not in website:
+        or_conditions.append({"website": {"$regex": f"{website}$", "$options": "i"}})
+        
+    if not or_conditions:
+        # Fallback to Name + City
+        if name_norm and city_norm:
+            or_conditions.append({
+                "normalized_name": name_norm,
+                "city": {"$regex": f"^{city_norm}$", "$options": "i"}
+            })
+        elif name_norm:
+            or_conditions.append({"normalized_name": name_norm})
+            
+    if not or_conditions:
+        return False
+        
+    query = {"$or": or_conditions}
     return leads_collection.find_one(query) is not None
 
 
@@ -132,7 +157,7 @@ def add_lead(lead: Dict) -> bool:
     init_db()
     row = _lead_to_db_row(lead)
 
-    if lead_exists(row.get("email"), row.get("phone"), row.get("business_name")):
+    if lead_exists(row.get("email"), row.get("phone"), row.get("business_name"), row.get("website"), row.get("city")):
         logger.info(f"Skipped duplicate: {row.get('business_name')}")
         return False
 
@@ -372,18 +397,45 @@ def get_leads_for_whatsapp() -> List[Dict]:
         return []
 
 
-def export_rows() -> List[List[str]]:
-    """Export all leads as rows for Google Sheets."""
+
+
+def add_email_record(lead_id: str, subject: str, body: str, email_type: str, status: str = "sent"):
+    """Record a sent email in history."""
     try:
-        from config import SHEET_HEADERS
-        leads = get_all_leads()
-        rows = []
-        for lead in leads:
-            row = []
-            for header in SHEET_HEADERS:
-                row.append(str(lead.get(header, "") or ""))
-            rows.append(row)
-        return rows
+        record = {
+            "lead_id": lead_id,
+            "subject": subject,
+            "body": body,
+            "type": email_type,
+            "status": status,
+            "sent_at": datetime.now().isoformat()
+        }
+        email_history_collection.insert_one(record)
+        return True
     except Exception as e:
-        logger.error(f"Error exporting rows: {e}")
+        logger.error(f"Error adding email record: {e}")
+        return False
+
+def get_email_history(lead_id: str) -> List[Dict]:
+    """Get all past emails for a lead."""
+    try:
+        cursor = email_history_collection.find({"lead_id": lead_id}).sort("sent_at", -1)
+        history = list(cursor)
+        for h in history:
+            h["_id"] = str(h["_id"])
+        return history
+    except Exception as e:
+        logger.error(f"Error fetching email history: {e}")
+        return []
+
+def get_lead_email_thread(lead_id: str) -> List[Dict]:
+    """Get chronological email history."""
+    try:
+        cursor = email_history_collection.find({"lead_id": lead_id}).sort("sent_at", 1)
+        history = list(cursor)
+        for h in history:
+            h["_id"] = str(h["_id"])
+        return history
+    except Exception as e:
+        logger.error(f"Error fetching email thread: {e}")
         return []

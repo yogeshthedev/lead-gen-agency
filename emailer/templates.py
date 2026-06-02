@@ -21,13 +21,11 @@ TEMPLATES = {
             "subject": "Quick question about {name}'s website",
             "body": """Hi,
 
-I was looking up {name} online and noticed your restaurant doesn't have a modern website yet.
+I was looking up {name} online and noticed you don't have a modern website yet.
 
-Most customers in {city} search on Google before deciding where to eat. If you're not showing up with a clean, fast website — you're losing them to competitors.
+I specialize in building websites for restaurants in {city}. Before I send over more details, I just wanted to ask — are you currently interested in upgrading your online presence?
 
-I build restaurant websites in 7 days with menu, photos, and Google Maps integration. Starting at Rs. 8,000.
-
-Free 10-min call: {cal_link}
+Please reply with a quick 'Yes' or 'No' so I know whether to send more info or cross you off my list.
 
 Best,
 {your_name}"""
@@ -36,42 +34,34 @@ Best,
             "subject": "Re: {name} — online visibility",
             "body": """Hi,
 
-Just following up.
+Just following up on my previous email.
 
-Did you know restaurants with a proper website get 35% more calls from Google than those without?
+I can help {name} get more customers from Google with a new website. Are you interested in discussing this?
 
-I can set that up for {name} in one week — menu, photos, contact page, Google-ready.
-
-Rs. 8,000. Free call to discuss: {cal_link}
+A simple 'Yes' or 'No' would be super helpful!
 
 Best,
 {your_name}"""
         },
         {   # Day 7
-            "subject": "How restaurants in {city} are getting more customers online",
+            "subject": "Checking in one last time — {name}",
             "body": """Hi,
 
-One last follow-up.
+I'll make this short. I help restaurants in {city} build websites that actually drive reservations.
 
-I recently helped a restaurant in {city} build their website. They started getting 3-4 new table bookings per week just from people finding them on Google.
-
-If you'd like the same for {name}, I have one slot this week.
-
-Book here: {cal_link}
+If you're interested, let me know. If not, just reply 'No' and I won't reach out again.
 
 Best,
 {your_name}
 {website}"""
         },
         {   # Day 14
-            "subject": "Last email — {name}",
+            "subject": "Closing the loop — {name}",
             "body": """Hi,
 
-Last email from me — promise!
+I haven't heard back, so I'll assume growing {name}'s online presence isn't a priority right now.
 
-If {name} ever needs a website, I'm here. Rs. 8,000, 7 days.
-
-{cal_link}
+If that changes in the future, feel free to reach out.
 
 Best,
 {your_name}"""
@@ -81,21 +71,17 @@ Best,
     # ── Chartered Accountants ─────────────────
     "chartered accountants": [
         {
-            "subject": "Your website — {name}",
+            "subject": "Quick question about {name}'s website",
             "body": """Hi,
 
-I came across {name} while researching CA firms in {city}.
+I came across {name} while researching CA firms in {city} and noticed your website could use an upgrade.
 
-Potential clients judge a CA firm's credibility by their website before calling. An outdated or missing website means losing clients to firms that look more professional online.
+I build professional websites specifically for CA firms. Before I send over more details, are you currently interested in upgrading your online presence to get more clients?
 
-I build clean, professional websites for CA firms — service pages, team section, client enquiry forms — in 7 days.
-
-Free 10-min call: {cal_link}
+Please reply with a quick 'Yes' or 'No'.
 
 Best,
-{your_name}
-
-P.S. Starting at Rs. 8,000."""
+{your_name}"""
         },
         {
             "subject": "Re: {name} — client acquisition online",
@@ -103,40 +89,32 @@ P.S. Starting at Rs. 8,000."""
 
 Following up on my last email.
 
-When someone searches "{name} {city}" on Google — what do they find? If the answer is nothing or an outdated site, you're losing clients every day.
+I can help {name} attract more clients from Google with a modern website. Are you interested in discussing this?
 
-I can fix that in one week for Rs. 8,000.
-
-Free call: {cal_link}
+A simple 'Yes' or 'No' would be super helpful!
 
 Best,
 {your_name}"""
         },
         {
-            "subject": "CA firms getting clients from Google — {city}",
+            "subject": "Checking in one last time — {name}",
             "body": """Hi,
 
-Last follow-up from my side.
+I'll keep this short. I help CA firms in {city} build websites that rank on Google and bring in leads.
 
-A CA firm in Rajasthan I worked with recently started getting 4-5 new client enquiries per week from Google alone — just from having a well-structured website with clear service pages.
-
-One slot open this week for {name}.
-
-Book: {cal_link}
+If you're interested, let me know. If not, just reply 'No' and I won't reach out again.
 
 Best,
 {your_name}
 {website}"""
         },
         {
-            "subject": "Last email — {name}",
+            "subject": "Closing the loop — {name}",
             "body": """Hi,
 
-Last email — I don't want to crowd your inbox.
+I haven't heard back, so I'll assume growing {name}'s online presence isn't a priority right now.
 
-If {name} ever needs a professional website, happy to help. Rs. 8,000, 7 days.
-
-{cal_link}
+If that changes in the future, feel free to reach out.
 
 Best,
 {your_name}"""
@@ -149,13 +127,11 @@ Best,
             "subject": "Quick question about {name}'s website",
             "body": """Hi,
 
-I was looking for clinics in {city} and came across {name}.
+I was looking for clinics in {city} and noticed {name} doesn't have a modern website for patients to book appointments.
 
-Patients today search for doctors on Google before booking. If your clinic doesn't have a fast, professional website with your services, timings, and location — you're missing patients who go to the next result.
+I specialize in building clinic websites. Before I send over more details, I just wanted to ask — are you currently interested in upgrading your online presence?
 
-I build clinic websites in 7 days — appointment booking, services, doctor profile, Google Maps. Starting at Rs. 8,000.
-
-Free 10-min call: {cal_link}
+Please reply with a quick 'Yes' or 'No'.
 
 Best,
 {your_name}"""
@@ -164,42 +140,34 @@ Best,
             "subject": "Re: {name} — more patients from Google",
             "body": """Hi,
 
-Following up on my last email.
+Just following up on my previous email.
 
-Most clinics that rank on Google in {city} have one thing in common — a clean website with clear service info and an easy way to book.
+I can help {name} get more patient bookings from Google with a new website. Are you interested in discussing this?
 
-I can build that for {name} in a week.
-
-Free call: {cal_link}
+A simple 'Yes' or 'No' would be super helpful!
 
 Best,
 {your_name}"""
         },
         {
-            "subject": "How clinics in {city} are getting patients online",
+            "subject": "Checking in one last time — {name}",
             "body": """Hi,
 
-Last follow-up.
+I'll make this short. I help clinics in {city} build websites that actually drive patient appointments.
 
-I helped a clinic in Rajasthan build their website recently. They started getting appointment requests through Google within 2 weeks of going live.
-
-One slot open this week for {name}. Rs. 8,000, 7 days.
-
-Book: {cal_link}
+If you're interested, let me know. If not, just reply 'No' and I won't reach out again.
 
 Best,
 {your_name}
 {website}"""
         },
         {
-            "subject": "Last email — {name}",
+            "subject": "Closing the loop — {name}",
             "body": """Hi,
 
-Last one — I won't email again after this.
+I haven't heard back, so I'll assume growing {name}'s online presence isn't a priority right now.
 
-If {name} ever needs a website, I'd love to help. Rs. 8,000, 7 days.
-
-{cal_link}
+If that changes in the future, feel free to reach out.
 
 Best,
 {your_name}"""
@@ -212,13 +180,11 @@ Best,
             "subject": "Students are searching online — {name}",
             "body": """Hi,
 
-I noticed {name} while looking at coaching institutes in {city}.
+I noticed {name} while looking at coaching institutes in {city} and saw your website could use an upgrade.
 
-Parents and students search online before choosing a coaching centre. A professional website with your courses, results, faculty, and fees makes the first impression that gets them to call you.
+I build websites for coaching centres to help drive admissions. Before I send over more details, are you currently interested in upgrading your online presence?
 
-I build coaching institute websites in 7 days. Starting at Rs. 8,000.
-
-Free 10-min call: {cal_link}
+Please reply with a quick 'Yes' or 'No'.
 
 Best,
 {your_name}"""
@@ -227,42 +193,34 @@ Best,
             "subject": "Re: {name} — online admissions",
             "body": """Hi,
 
-Following up quickly.
+Just following up on my previous email.
 
-Coaching centres in {city} with a website and Google listing get significantly more enquiry calls than those without.
+I can help {name} get more admission enquiries from Google with a new website. Are you interested in discussing this?
 
-I can set this up for {name} in one week for Rs. 8,000.
-
-Free call: {cal_link}
+A simple 'Yes' or 'No' would be super helpful!
 
 Best,
 {your_name}"""
         },
         {
-            "subject": "Coaching institute websites — what's working in {city}",
+            "subject": "Checking in one last time — {name}",
             "body": """Hi,
 
-Last follow-up.
+I'll make this short. I help coaching centres in {city} build websites that actually drive enrollments.
 
-A coaching centre I worked with in Rajasthan saw a 40% increase in enquiry calls after we rebuilt their website and optimised it for Google.
-
-One slot this week for {name}.
-
-Book: {cal_link}
+If you're interested, let me know. If not, just reply 'No' and I won't reach out again.
 
 Best,
 {your_name}
 {website}"""
         },
         {
-            "subject": "Last email — {name}",
+            "subject": "Closing the loop — {name}",
             "body": """Hi,
 
-Last email from me.
+I haven't heard back, so I'll assume growing {name}'s online presence isn't a priority right now.
 
-If {name} ever needs a modern website, I'm here. Rs. 8,000, 7 days.
-
-{cal_link}
+If that changes in the future, feel free to reach out.
 
 Best,
 {your_name}"""
@@ -275,13 +233,11 @@ Best,
             "subject": "Your portfolio online — {name}",
             "body": """Hi,
 
-I came across {name} while looking at interior designers in {city}.
+I came across {name} while looking at interior designers in {city} and noticed your website could use an upgrade.
 
-Interior design is a visual business — clients want to see your work before calling. A slow or outdated website (or no website) means losing high-value clients to designers with better online presence.
+I build beautiful portfolio websites for interior designers. Before I send over more details, are you currently interested in upgrading your online presence to get more clients?
 
-I build portfolio websites for interior designers in 7 days — project gallery, before/after photos, contact form. Starting at Rs. 8,000.
-
-Free 10-min call: {cal_link}
+Please reply with a quick 'Yes' or 'No'.
 
 Best,
 {your_name}"""
@@ -290,40 +246,34 @@ Best,
             "subject": "Re: {name} — showcasing your work online",
             "body": """Hi,
 
-Following up on my last email.
+Just following up on my previous email.
 
-Your design work deserves to be seen. A professional portfolio website means clients find you on Google and see your best projects before even making the first call.
+I can help {name} attract more high-value clients from Google with a modern website. Are you interested in discussing this?
 
-Rs. 8,000, 7 days. Free call: {cal_link}
+A simple 'Yes' or 'No' would be super helpful!
 
 Best,
 {your_name}"""
         },
         {
-            "subject": "Interior designer portfolios — {city}",
+            "subject": "Checking in one last time — {name}",
             "body": """Hi,
 
-Last follow-up.
+I'll make this short. I help interior designers in {city} build websites that showcase their work and drive leads.
 
-An interior designer I helped in Rajasthan started getting 2-3 project enquiries per week from Google after we launched their portfolio website.
-
-One slot this week for {name}.
-
-Book: {cal_link}
+If you're interested, let me know. If not, just reply 'No' and I won't reach out again.
 
 Best,
 {your_name}
 {website}"""
         },
         {
-            "subject": "Last email — {name}",
+            "subject": "Closing the loop — {name}",
             "body": """Hi,
 
-Last one from me.
+I haven't heard back, so I'll assume growing {name}'s online presence isn't a priority right now.
 
-Whenever {name} is ready for a portfolio website, I'd love to help. Rs. 8,000, 7 days.
-
-{cal_link}
+If that changes in the future, feel free to reach out.
 
 Best,
 {your_name}"""
@@ -338,11 +288,9 @@ Best,
 
 I came across {name} while looking at real estate agents in {city}.
 
-Today's property buyers search online and shortlist agents based on their website before calling. Without a professional site showing your listings, areas you cover, and client testimonials — you're invisible to a huge chunk of buyers.
+I specialize in building professional websites for real estate agents to showcase properties. Before I send over more details, are you currently interested in upgrading your online presence?
 
-I build real estate websites in 7 days. Starting at Rs. 8,000.
-
-Free 10-min call: {cal_link}
+Please reply with a quick 'Yes' or 'No'.
 
 Best,
 {your_name}"""
@@ -351,42 +299,34 @@ Best,
             "subject": "Re: {name} — property leads from Google",
             "body": """Hi,
 
-Following up.
+Just following up on my previous email.
 
-Real estate agents in {city} with a website get property enquiries directly from Google search — without spending on ads.
+I can help {name} get more property enquiries directly from Google with a new website. Are you interested in discussing this?
 
-I can build that for {name} in one week for Rs. 8,000.
-
-Free call: {cal_link}
+A simple 'Yes' or 'No' would be super helpful!
 
 Best,
 {your_name}"""
         },
         {
-            "subject": "Real estate websites — what's working in {city}",
+            "subject": "Checking in one last time — {name}",
             "body": """Hi,
 
-Last follow-up.
+I'll make this short. I help real estate agents in {city} build websites that actually generate leads.
 
-An agent I worked with in Rajasthan started getting direct property enquiries through Google within a month of launching their site.
-
-One slot this week for {name}. Rs. 8,000, 7 days.
-
-Book: {cal_link}
+If you're interested, let me know. If not, just reply 'No' and I won't reach out again.
 
 Best,
 {your_name}
 {website}"""
         },
         {
-            "subject": "Last email — {name}",
+            "subject": "Closing the loop — {name}",
             "body": """Hi,
 
-Last email — won't bother you again after this.
+I haven't heard back, so I'll assume growing {name}'s online presence isn't a priority right now.
 
-If {name} ever needs a website, happy to help. Rs. 8,000, 7 days.
-
-{cal_link}
+If that changes in the future, feel free to reach out.
 
 Best,
 {your_name}"""

@@ -14,9 +14,9 @@ const templates = {
 
 I came across *${name}* while searching for CA firms in ${city}.
 
-I help CA firms get a professional website that brings in new clients from Google.
+I help CA firms get a professional website that brings in new clients from Google. Before I share more info, are you interested in upgrading your online presence?
 
-Would you be open to a quick 10-minute call this week?
+Just reply with a quick 'Yes' or 'No'.
 
 — ${yourName}`,
 
@@ -24,11 +24,11 @@ Would you be open to a quick 10-minute call this week?
     (name, city, yourName) =>
 `Hi again,
 
-Just following up on my last message about *${name}*'s website.
+Just following up on my last message.
 
-Most CA firms in ${city} losing clients online simply don't have a fast, professional website.
+I can help *${name}* attract more clients online with a new website. Are you interested in discussing this?
 
-I can fix that in 7 days for ₹8,000. Interested?
+A simple 'Yes' or 'No' is perfectly fine!
 
 — ${yourName}`,
 
@@ -38,9 +38,7 @@ I can fix that in 7 days for ₹8,000. Interested?
 
 Last message from my side — I don't want to bother you!
 
-If *${name}* ever needs a website, I'm here. ₹8,000, 7 days.
-
-Happy to share examples anytime 🙏
+If *${name}* ever wants to improve their online presence, I'm here. Otherwise, I won't reach out again.
 
 — ${yourName}`,
   ],
@@ -49,31 +47,31 @@ Happy to share examples anytime 🙏
     (name, city, yourName) =>
 `Hi,
 
-I noticed *${name}* doesn't have a website yet.
+I noticed *${name}* doesn't have a modern website yet.
 
-Customers in ${city} search on Google before deciding where to eat. A good website means more tables filled.
+I build websites for restaurants in ${city} to help get more bookings. Are you currently interested in upgrading your online presence?
 
-Can I show you some examples? Takes 10 minutes.
-
-— ${yourName}`,
-
-    (name, city, yourName) =>
-`Hi,
-
-Following up about *${name}*'s online presence.
-
-A website with your menu and photos costs ₹8,000 and takes one week. It pays for itself with 2-3 extra tables per week.
-
-Interested?
+Just reply with a quick 'Yes' or 'No'.
 
 — ${yourName}`,
 
     (name, city, yourName) =>
 `Hi,
 
-Last follow-up from my side.
+Following up on my last message.
 
-If *${name}* ever needs a website, do reach out. ₹8,000, 7 days 🙏
+I can help *${name}* get more customers from Google with a new website. Are you interested in this?
+
+A simple 'Yes' or 'No' works for me!
+
+— ${yourName}`,
+
+    (name, city, yourName) =>
+`Hi,
+
+Last message from my side.
+
+If *${name}* ever wants a website to drive more bookings, do reach out. Otherwise, I'll stop messaging here. 🙏
 
 — ${yourName}`,
   ],
@@ -82,22 +80,22 @@ If *${name}* ever needs a website, do reach out. ₹8,000, 7 days 🙏
     (name, city, yourName) =>
 `Hi,
 
-I came across *${name}* while looking for clinics in ${city}.
+I came across *${name}* while looking for clinics in ${city} and noticed your website could use an upgrade.
 
-Patients search for doctors on Google before booking. A clean website with your services and timings helps them find and choose you.
+I help clinics get more patient bookings online. Are you interested in upgrading your online presence right now?
 
-Would you like to see how it works? Quick 10-min call?
+Just reply with a quick 'Yes' or 'No'.
 
 — ${yourName}`,
 
     (name, city, yourName) =>
 `Hi,
 
-Following up about *${name}*'s website.
+Following up on my last message.
 
-A professional clinic website helps patients find you on Google and book directly. ₹8,000, ready in 7 days.
+I can help *${name}* attract more patients from Google with a professional website. Are you open to discussing this?
 
-Interested to know more?
+A simple 'Yes' or 'No' is perfectly fine!
 
 — ${yourName}`,
 
@@ -106,7 +104,7 @@ Interested to know more?
 
 Last message from me about *${name}*.
 
-Whenever you're ready for a website, I'm here. ₹8,000, 7 days 🙏
+Whenever you're ready to grow your online presence, I'm here. Otherwise, I won't bother you again. 🙏
 
 — ${yourName}`,
   ],
@@ -117,20 +115,20 @@ Whenever you're ready for a website, I'm here. ₹8,000, 7 days 🙏
 
 I found *${name}* while looking at coaching centres in ${city}.
 
-Students and parents search online before choosing a coaching centre. A website with your courses, results and fees gets you more enquiries.
+I help institutes get more admission enquiries with a professional website. Are you currently interested in upgrading your online presence?
 
-Interested in a quick chat?
+Just reply with a quick 'Yes' or 'No'.
 
 — ${yourName}`,
 
     (name, city, yourName) =>
 `Hi,
 
-Following up about *${name}*'s online presence.
+Following up on my last message.
 
-A well-made website with Google visibility means more admission enquiries. ₹8,000, 7 days.
+I can help *${name}* get more enrollments from Google with a new website. Are you interested in this?
 
-Can I show you examples?
+A simple 'Yes' or 'No' works!
 
 — ${yourName}`,
 
@@ -139,7 +137,7 @@ Can I show you examples?
 
 Last one from my side about *${name}*.
 
-Whenever you're ready for a website, happy to help. ₹8,000, 7 days 🙏
+Whenever you want to upgrade your website, happy to help. Otherwise, I'll stop messaging here. 🙏
 
 — ${yourName}`,
   ],
@@ -150,20 +148,20 @@ Whenever you're ready for a website, happy to help. ₹8,000, 7 days 🙏
 
 I came across *${name}* while looking at interior designers in ${city}.
 
-Your work deserves to be seen online. A portfolio website helps clients find you on Google and see your projects before calling.
+I build beautiful portfolio websites to help designers get more clients. Are you currently interested in upgrading your online presence?
 
-Quick 10-min call to show you how?
+Just reply with a quick 'Yes' or 'No'.
 
 — ${yourName}`,
 
     (name, city, yourName) =>
 `Hi,
 
-Following up about *${name}*'s portfolio website.
+Following up on my last message.
 
-A clean portfolio site with your best projects gets you better clients online. ₹8,000, 7 days.
+I can help *${name}* attract more high-value clients from Google. Are you open to discussing this?
 
-Interested?
+A simple 'Yes' or 'No' is perfectly fine!
 
 — ${yourName}`,
 
@@ -172,7 +170,7 @@ Interested?
 
 Last message about *${name}*.
 
-Whenever you want a portfolio website, I'm here. ₹8,000, 7 days 🙏
+Whenever you want a portfolio website, I'm here. Otherwise, I won't reach out again. 🙏
 
 — ${yourName}`,
   ],
@@ -183,20 +181,20 @@ Whenever you want a portfolio website, I'm here. ₹8,000, 7 days 🙏
 
 I found *${name}* while looking at real estate agents in ${city}.
 
-Property buyers search agents online before calling. A website with your listings and area expertise brings direct enquiries.
+I build professional websites to help agents generate more property leads online. Are you interested in upgrading your online presence?
 
-10-min call this week?
+Just reply with a quick 'Yes' or 'No'.
 
 — ${yourName}`,
 
     (name, city, yourName) =>
 `Hi,
 
-Following up about *${name}*'s website.
+Following up on my last message.
 
-A professional real estate website means property enquiries directly from Google — no ad spend needed. ₹8,000, 7 days.
+I can help *${name}* get more property enquiries directly from Google. Are you open to discussing this?
 
-Interested?
+A simple 'Yes' or 'No' works for me!
 
 — ${yourName}`,
 
@@ -205,7 +203,7 @@ Interested?
 
 Last message from my side about *${name}*.
 
-Whenever you're ready for a website, happy to help. ₹8,000, 7 days 🙏
+Whenever you're ready for a website, happy to help. Otherwise, I'll stop messaging here. 🙏
 
 — ${yourName}`,
   ],

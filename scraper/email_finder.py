@@ -61,20 +61,43 @@ def get_emails_from_html(html: str) -> list:
             found.append(e)
     return found
 
-def find_on_website(page, url: str) -> str:
-    """Check a website for contact email."""
-    if not good_website(url): return ""
+def get_socials_from_html(html: str) -> list:
+    """Get Instagram/Facebook/LinkedIn from HTML."""
+    soup = BeautifulSoup(html, "html.parser")
+    found = set()
+    for a in soup.find_all("a", href=True):
+        href = a["href"].lower()
+        if any(x in href for x in ["instagram.com", "facebook.com", "linkedin.com"]):
+            if not any(j in href for j in ["/share", "sharer", "/post", "/status"]):
+                found.add(a["href"])
+    return list(found)
+
+def find_on_website(page, url: str) -> tuple:
+    """Check a website for contact email and social links."""
+    if not good_website(url): return ("", [])
     base = url.rstrip("/")
-    for path in ["", "/contact", "/contact-us", "/about"]:
+    best_email = ""
+    all_socials = set()
+    
+    for path in ["", "/contact", "/contact-us", "/about", "/contact.html", "/about-us", "/support"]:
         try:
             page.goto(base + path, timeout=10000, wait_until="domcontentloaded")
             time.sleep(0.8)
-            emails = get_emails_from_html(page.content())
-            if emails:
-                logger.info(f"  Found on {path or '/'}: {emails[0]}")
-                return emails[0]
+            html = page.content()
+            
+            emails = get_emails_from_html(html)
+            if emails and not best_email:
+                best_email = emails[0]
+                logger.info(f"  Found on {path or '/'}: {best_email}")
+                
+            socials = get_socials_from_html(html)
+            for s in socials: all_socials.add(s)
+                
+            if best_email and len(all_socials) > 0:
+                break # Found enough info
         except: continue
-    return ""
+        
+    return (best_email, list(all_socials))
 
 def get_website_from_maps(page, maps_url: str) -> str:
     """Visit Maps profile and get the business website URL."""
@@ -95,7 +118,8 @@ def google_search_email(page, name: str, city: str) -> str:
     """Search Google for business email."""
     # Use short name only
     short = name.split("|")[0].split("-")[0].strip()[:50]
-    query = f'{short} {city} email contact'.replace(" ", "+")
+    # Strict footprint for emails
+    query = f'"{short}" "{city}" ("@gmail.com" OR "@yahoo.com" OR "contact@")'.replace(" ", "+")
     try:
         page.goto(f"https://www.google.com/search?q={query}",
                   timeout=10000, wait_until="domcontentloaded")
@@ -156,7 +180,9 @@ def enrich_leads_with_emails():
             if website and not email:
                 update_field(lead_id, "Has Website", "yes")
                 update_field(lead_id, "Website Quality", website_quality(website))
-                email = find_on_website(page, website)
+                email, socials = find_on_website(page, website)
+                if socials:
+                    update_field(lead_id, "Social Links", ",".join(socials))
 
             # 2. Get website from Maps profile → check it
             if maps_url and not email:
@@ -166,7 +192,9 @@ def enrich_leads_with_emails():
                     update_lead_fields(lead_id, {"Website": site})
                     update_field(lead_id, "Has Website", "yes")
                     update_field(lead_id, "Website Quality", website_quality(site))
-                    email = find_on_website(page, site)
+                    email, socials = find_on_website(page, site)
+                    if socials:
+                        update_field(lead_id, "Social Links", ",".join(socials))
 
             # 3. Google search
             if not email:
