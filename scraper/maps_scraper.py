@@ -1,6 +1,7 @@
 """
 scraper/maps_scraper.py
 Scrapes Google Maps. Extracts name from aria-label, full details from feed containers.
+Saves ALL leads (with and without websites). Marks website status for filtering in UI.
 """
 
 import sys, os
@@ -19,6 +20,21 @@ BAD_URL_PARTS = [
     "google.", "gstatic.", "ggpht.", "maps.google", "googleusercontent",
     "facebook.", "instagram.", "youtube.", "twitter.", "whatsapp.",
 ]
+
+# UI junk phrases that are NOT real business names
+JUNK_PHRASES = [
+    "showing results", "search instead", "ratinghours",
+    "all filters", "results", "open now", "closes soon",
+    "get the most out of", "you've reached the end",
+    "explore this area", "update results", "sponsored",
+    "see results about", "showing results for",
+]
+
+JUNK_EXACT = {
+    "results", "rating", "hours", "filters", "share", "directions",
+    "website", "menu", "overview", "reviews", "photos", "map",
+    "about", "close", "open", "more", "less",
+}
 
 
 def parse_container_text(text: str) -> dict:
@@ -100,6 +116,29 @@ def _extract_phone_from_text(text: str) -> str:
     if not nums:
         return ""
     return clean_phone(nums[0])
+
+
+def _is_junk_name(name: str) -> bool:
+    """Check if a name is Google Maps UI junk, not a real business."""
+    name_lower = name.strip().lower()
+    
+    # Exact match junk
+    if name_lower in JUNK_EXACT:
+        return True
+    
+    # Contains junk phrases
+    if any(p in name_lower for p in JUNK_PHRASES):
+        return True
+    
+    # Has special unicode chars (UI icons)
+    if any(ord(c) > 8000 for c in name):
+        return True
+    
+    # Too short
+    if len(name_lower) < 5:
+        return True
+    
+    return False
 
 
 def _extract_details_from_panel(page) -> dict:
@@ -192,11 +231,11 @@ def scrape_google_maps(city: str, business: str, max_leads: int = 30) -> list:
 
             # Scroll feed to load more results and parse progressively
             logger.info("Scrolling to load listings...")
-            seen = set()
+            seen = set()  # tracks ALL processed names (both saved and skipped)
             no_new_rounds = 0
             max_rounds = max(8, int(max_leads / 4) + 6)
 
-            for _ in range(max_rounds):
+            for round_num in range(max_rounds):
                 page.evaluate("""
                     var feed = document.querySelector('div[role="feed"]');
                     if (feed) { feed.scrollTop = feed.scrollTop + 700; }
@@ -228,46 +267,53 @@ def scrape_google_maps(city: str, business: str, max_leads: int = 30) -> list:
                             continue
 
                         # Skip UI junk
-                        has_special = any(ord(c) > 8000 for c in name)
-                        skip_phrases = [
-                            "showing results", "search instead", "ratinghours",
-                            "all filters", "results", "open now", "closes soon",
-                        ]
-                        is_junk = any(p in name.lower() for p in skip_phrases)
-                        is_ui = name.strip().lower() in ["results", "rating", "hours", "filters", "share", "directions", "website", "menu", "overview", "reviews", "photos"]
-                        if has_special or is_junk or is_ui or len(name) < 5:
+                        if _is_junk_name(name):
                             continue
 
-                        if name.lower().strip() in seen:
+                        # Already processed this name (saved or skipped)
+                        name_key = name.lower().strip()
+                        if name_key in seen:
                             continue
+                        seen.add(name_key)  # Mark as seen IMMEDIATELY
 
-                        # Find Maps URL by matching name
+                        # Strategy 1: Get Maps URL directly from the container's link
                         maps_url = ""
-                        name_lower = name.lower()
-                        for key, val in url_map.items():
-                            if name_lower in key or key.startswith(name_lower[:15].lower()):
-                                maps_url = val
-                                break
+                        container_link = container.query_selector('a[href*="/maps/place/"]')
+                        if container_link:
+                            maps_url = container_link.get_attribute("href") or ""
 
-                        # Open listing panel to capture phone/website if missing
-                        needs_details = not parsed["phone"] or not parsed["has_website"]
+                        # Strategy 2: Match name against url_map (aria-label links)
+                        if not maps_url:
+                            name_lower = name.lower()
+                            for key, val in url_map.items():
+                                if name_lower in key or key.startswith(name_lower[:15].lower()):
+                                    maps_url = val
+                                    break
+
+                        # Open listing panel to capture phone/website details
+                        needs_details = not parsed["phone"]
+                        parsed_site = ""
                         if needs_details:
                             try:
-                                link = container.query_selector('a[href*="/maps/place/"]')
-                                if link:
-                                    link.click()
+                                if container_link:
+                                    container_link.click()
                                 else:
                                     container.click()
                                 page.wait_for_timeout(1200)
                                 page.wait_for_selector('h1', timeout=6000)
+
+                                # Strategy 3: Grab the maps URL from the current page URL
+                                if not maps_url:
+                                    current_url = page.url
+                                    if "/maps/place/" in current_url:
+                                        maps_url = current_url
+
                                 details = _extract_details_from_panel(page)
                                 if details.get("phone"):
                                     parsed["phone"] = details["phone"]
                                 if details.get("website"):
                                     parsed["has_website"] = True
                                     parsed_site = details["website"]
-                                else:
-                                    parsed_site = ""
                                 if details.get("rating") and not parsed.get("rating"):
                                     parsed["rating"] = details["rating"]
                                 if details.get("reviews") and not parsed.get("reviews"):
@@ -276,8 +322,10 @@ def scrape_google_maps(city: str, business: str, max_leads: int = 30) -> list:
                                     parsed["address"] = details["address"]
                             except Exception:
                                 parsed_site = ""
-                        else:
-                            parsed_site = ""
+
+                        # Strategy 4: Fallback - generate a Google Maps search URL
+                        if not maps_url:
+                            maps_url = f"https://www.google.com/maps/search/{name.replace(' ', '+')}+{city.replace(' ', '+')}"
 
                         lead = {
                             "Business Name":   name,
@@ -301,9 +349,8 @@ def scrape_google_maps(city: str, business: str, max_leads: int = 30) -> list:
                             "Lead Score":      "",
                         }
                         leads.append(lead)
-                        seen.add(name.lower().strip())
                         new_added += 1
-                        logger.info(f"Parsed: {name} | Phone: {parsed['phone']} | Rating: {parsed['rating']}")
+                        logger.info(f"✅ {name} | Phone: {parsed['phone']} | Website: {'yes' if parsed['has_website'] else 'no'} | Rating: {parsed['rating']} | Maps: {'✓' if '/place/' in maps_url else 'search'}")
 
                         if len(leads) >= max_leads:
                             break
@@ -341,13 +388,25 @@ def scrape_google_maps(city: str, business: str, max_leads: int = 30) -> list:
     return unique_leads
 
 
-def scrape_maps_and_save(city=None, business=None, max_leads=30):
+def scrape_maps_and_save(city=None, business=None, max_leads=30, website_filter="all"):
     city     = city or TARGET_CITY
     business = business or TARGET_BUSINESS
 
     leads = scrape_google_maps(city, business, max_leads)
     if not leads:
         logger.warning("No leads from Google Maps.")
+        return 0
+
+    # Apply website filter before saving
+    if website_filter == "with_website":
+        leads = [l for l in leads if l.get("Has Website") == "yes"]
+        logger.info(f"Website filter: keeping only leads WITH website ({len(leads)} leads)")
+    elif website_filter == "without_website":
+        leads = [l for l in leads if l.get("Has Website") != "yes"]
+        logger.info(f"Website filter: keeping only leads WITHOUT website ({len(leads)} leads)")
+
+    if not leads:
+        logger.warning("No leads remaining after website filter.")
         return 0
 
     init_db()

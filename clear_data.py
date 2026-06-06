@@ -1,35 +1,31 @@
 import os
-import sys
+from pymongo import MongoClient
+from dotenv import load_dotenv
 
-# Change to the directory of the script
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# Load environment variables from .env file
+load_dotenv()
 
-from config import DB_PATH
-from storage.mongo_db import init_db
-from sheets.sheet_manager import export_db_to_sheet
-
-def main():
-    db_file = os.path.abspath(DB_PATH)
-    if os.path.exists(db_file):
-        try:
-            os.remove(db_file)
-            print(f"Deleted database file: {db_file}")
-        except Exception as e:
-            print(f"Error deleting database file (it might be in use): {e}")
-            return
-    else:
-        print(f"Database file not found: {db_file}")
+def clear_database():
+    MONGO_DB_URL = os.getenv("MONGO_DB_URL", "mongodb+srv://user:password@cluster.mongodb.net/leadgen")
     
-    # Re-initialize the empty database
-    init_db()
-    print("Re-initialized empty database.")
-    
-    # Export the empty database to Google Sheets (clears old data)
-    print("Syncing empty database to Google Sheets...")
-    if export_db_to_sheet():
-        print("Successfully cleared Google Sheet.")
-    else:
-        print("Failed to sync to Google Sheet. Please check credentials.")
+    print(f"Connecting to MongoDB...")
+    try:
+        client = MongoClient(MONGO_DB_URL)
+        db = client.get_database('leadgen')
+        
+        # Clear leads collection
+        leads_result = db['leads'].delete_many({})
+        print(f"✅ Cleared {leads_result.deleted_count} leads from the database.")
+        
+        # Clear email history collection
+        history_result = db['email_history'].delete_many({})
+        print(f"✅ Cleared {history_result.deleted_count} email history records.")
+        
+        client.close()
+        print("Database cleanup complete!")
+        
+    except Exception as e:
+        print(f"❌ Error clearing database: {e}")
 
 if __name__ == "__main__":
-    main()
+    clear_database()

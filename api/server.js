@@ -260,160 +260,9 @@ app.post('/api/leads/update', async (req, res) => {
   }
 });
 
-// Run Scraper locally
-app.post('/api/scrape', async (req, res) => {
-  try {
-    const { city, business, source, limit } = req.body;
-    
-    // Update config using env vars passed to child process
-    const env = { 
-      ...process.env, 
-      TARGET_CITY: city || 'Jaipur',
-      TARGET_BUSINESS: business || 'chartered accountants'
-    };
-    
-    console.log(`Starting scrape for ${business} in ${city} via ${source}`);
-    
-    let script = '';
-    if (source === 'maps' || source === 'gm') script = "from scraper.maps_scraper import scrape_maps_and_save; scrape_maps_and_save()";
-    else if (source === 'justdial' || source === 'jd') script = "from scraper.justdial_scraper import scrape_and_save; scrape_and_save()";
-    else script = "from scraper.justdial_scraper import scrape_and_save; from scraper.maps_scraper import scrape_maps_and_save; scrape_and_save(); scrape_maps_and_save()";
 
-    const pythonProcess = spawn('python', ['-c', `import sys, os; sys.path.insert(0, os.path.dirname(os.path.abspath('main.py'))); ${script}`], {
-      env,
-      cwd: path.join(__dirname, '..')
-    });
 
-    pythonProcess.stdout.on('data', (data) => console.log(`Scraper: ${data}`));
-    pythonProcess.stderr.on('data', (data) => console.error(`Scraper Error: ${data}`));
 
-    pythonProcess.on('close', (code) => {
-      console.log(`Scraper process exited with code ${code}`);
-      if (code === 0) res.json({ ok: true, message: 'Scraping completed' });
-      else res.status(500).json({ error: 'Scraping failed with exit code ' + code });
-    });
-  } catch (err) {
-    console.error('Error starting scraper:', err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Run Bulk Emails
-app.post('/api/send-emails', async (req, res) => {
-  try {
-    const pythonProcess = spawn('python', ['-c', "import sys, os; sys.path.insert(0, os.path.dirname(os.path.abspath('main.py'))); from emailer.send_emails import send_to_new_leads; send_to_new_leads()"], {
-      cwd: path.join(__dirname, '..'),
-      env: process.env
-    });
-    
-    pythonProcess.stdout.on('data', (data) => console.log(`Emails: ${data}`));
-    pythonProcess.stderr.on('data', (data) => console.error(`Emails Error: ${data}`));
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) res.json({ ok: true });
-      else res.status(500).json({ error: 'Emails failed with exit code ' + code });
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Run Bulk Follow-ups
-app.post('/api/send-followups', async (req, res) => {
-  try {
-    const pythonProcess = spawn('python', ['-c', "import sys, os; sys.path.insert(0, os.path.dirname(os.path.abspath('main.py'))); from emailer.followup import run_followups; run_followups()"], {
-      cwd: path.join(__dirname, '..'),
-      env: process.env
-    });
-    
-    pythonProcess.stdout.on('data', (data) => console.log(`Follow-ups: ${data}`));
-    pythonProcess.stderr.on('data', (data) => console.error(`Follow-ups Error: ${data}`));
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) res.json({ ok: true });
-      else res.status(500).json({ error: 'Follow-ups failed with exit code ' + code });
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Send Single Email via Gmail CLI
-app.post('/api/leads/send-email', async (req, res) => {
-  try {
-    const { lead_id, custom_subject, custom_body } = req.body;
-    if (!lead_id) return res.status(400).json({ error: 'lead_id required' });
-
-    let args = ['emailer/send_single_email.py', '--lead-id', lead_id, '--template-index', '0'];
-    if (custom_subject) args.push('--custom-subject', custom_subject);
-    if (custom_body) args.push('--custom-body', custom_body);
-
-    const pyPath = path.join(__dirname, '..', '.venv_linux', 'bin', 'python');
-    const pythonExecutable = require('fs').existsSync(pyPath) ? pyPath : 'python';
-
-    const pythonProcess = spawn(pythonExecutable, args, {
-      cwd: path.join(__dirname, '..'),
-      env: process.env
-    });
-    
-    let output = '';
-    pythonProcess.stdout.on('data', (data) => { output += data; console.log(`Email: ${data}`); });
-    pythonProcess.stderr.on('data', (data) => { output += data; console.error(`Email Error: ${data}`); });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) res.json({ ok: true, output });
-      else res.status(500).json({ error: 'Single email failed', output });
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Send Followup Email via Gmail CLI
-app.post('/api/leads/send-followup', async (req, res) => {
-  try {
-    const { lead_id, template_index, custom_subject, custom_body } = req.body;
-    if (!lead_id) return res.status(400).json({ error: 'lead_id required' });
-
-    let args = ['emailer/send_single_email.py', '--lead-id', lead_id, '--template-index', (template_index || 1).toString()];
-    if (custom_subject) args.push('--custom-subject', custom_subject);
-    if (custom_body) args.push('--custom-body', custom_body);
-
-    const pyPath = path.join(__dirname, '..', '.venv_linux', 'bin', 'python');
-    const pythonExecutable = require('fs').existsSync(pyPath) ? pyPath : 'python';
-
-    const pythonProcess = spawn(pythonExecutable, args, {
-      cwd: path.join(__dirname, '..'),
-      env: process.env
-    });
-    
-    let output = '';
-    pythonProcess.stdout.on('data', (data) => { output += data; console.log(`Followup: ${data}`); });
-    pythonProcess.stderr.on('data', (data) => { output += data; console.error(`Followup Error: ${data}`); });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) res.json({ ok: true, output });
-      else res.status(500).json({ error: 'Followup email failed', output });
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get Email History
-app.get('/api/leads/:id/email-history', async (req, res) => {
-  try {
-    const lead_id = req.params.id;
-    const history = await db.collection('email_history')
-      .find({ lead_id: lead_id })
-      .sort({ sent_at: -1 })
-      .toArray();
-    res.json({ history: history || [] });
-  } catch (err) {
-    console.error('Error fetching email history:', err);
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // Generate WhatsApp Deep Link
 app.post('/api/leads/send-whatsapp', async (req, res) => {
@@ -445,32 +294,6 @@ app.post('/api/leads/send-whatsapp', async (req, res) => {
   }
 });
 
-// WhatsApp Bot API
-app.get('/api/whatsapp/status', (req, res) => {
-  exec('pgrep -f "node test_bot.js"', (err, stdout) => {
-    if (err || !stdout.trim()) {
-      res.json({ connected: false, running: false });
-    } else {
-      res.json({ connected: true, running: true });
-    }
-  });
-});
-
-app.post('/api/whatsapp/run-now', (req, res) => {
-  try {
-    const botProcess = spawn('node', ['test_bot.js'], {
-      cwd: path.join(__dirname, '../whatsapp'),
-      detached: true,
-      stdio: 'ignore'
-    });
-    botProcess.unref();
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
 // ── Outreach API ────────────────────────────────────────
 
 app.get('/api/leads/:id/template', async (req, res) => {
@@ -491,71 +314,15 @@ app.get('/api/leads/:id/template', async (req, res) => {
       process.env.YOUR_NAME || 'Yogesh'
     );
 
-    // Get Email Template (Python)
-    let emailTemplate = { subject: '', body: '' };
-    try {
-      const pyScript = path.join(__dirname, '../emailer/get_template_for_api.py');
-      // Pass args safely, wrapping in quotes to handle spaces
-      const output = require('child_process').execSync(
-        `python "${pyScript}" "${followUpCount}" "${lead.business_name || ''}" "${lead.city || ''}" "${lead.category || ''}"`
-      ).toString();
-      emailTemplate = JSON.parse(output);
-    } catch (e) {
-      console.error("Error getting email template:", e);
-    }
-
     res.json({
-      whatsapp: waMessage,
-      email: emailTemplate
+      whatsapp: waMessage
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/leads/:id/send-custom-email', async (req, res) => {
-  try {
-    const { subject, body } = req.body;
-    if (!subject || !body) return res.status(400).json({ error: 'Subject and body required' });
 
-    const lead = await db.collection('leads').findOne({ _id: new ObjectId(req.params.id) });
-    if (!lead || !lead.email) return res.status(404).json({ error: 'Lead not found or missing email' });
-
-    // We can use the existing send_single.py script!
-    // But wait, does send_single.py take custom subject/body? Let's check or create a temporary file.
-    // To be safe and clean, we can create a temporary JSON file, pass it to a new python script, or just pass as base64 args.
-    // It's easier to use a new python script `emailer/send_custom.py`
-    const fs = require('fs');
-    const tempFile = path.join(__dirname, `../data/temp_email_${Date.now()}.json`);
-    fs.writeFileSync(tempFile, JSON.stringify({
-      to: lead.email,
-      subject: subject,
-      body: body,
-      lead_id: req.params.id
-    }));
-
-    const pyScript = path.join(__dirname, '../emailer/send_custom_email.py');
-    const output = require('child_process').execSync(`python "${pyScript}" "${tempFile}"`).toString();
-
-    // Clean up temp file
-    fs.unlinkSync(tempFile);
-
-    // Update lead status in DB
-    const newCount = parseInt(lead.follow_up_count || "0", 10) + 1;
-    await db.collection('leads').updateOne(
-      { _id: new ObjectId(req.params.id) },
-      { $set: { 
-        email_status: newCount >= 3 ? 'follow_up' : 'sent', 
-        last_email_date: new Date().toISOString().split('T')[0],
-        follow_up_count: newCount
-      }}
-    );
-
-    res.json({ ok: true, message: 'Email sent' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 
 // Settings API
@@ -591,29 +358,7 @@ app.post('/api/settings', async (req, res) => {
   }
 });
 
-// Check IMAP Replies
-app.post('/api/check-replies', async (req, res) => {
-  try {
-    const pyPath = path.join(__dirname, '..', '.venv_linux', 'bin', 'python');
-    const pythonExecutable = require('fs').existsSync(pyPath) ? pyPath : 'python';
 
-    const pythonProcess = spawn(pythonExecutable, ['emailer/check_replies.py'], {
-      cwd: path.join(__dirname, '..'),
-      env: process.env
-    });
-    
-    let output = '';
-    pythonProcess.stdout.on('data', (data) => { output += data; console.log(`Check Replies: ${data}`); });
-    pythonProcess.stderr.on('data', (data) => { output += data; console.error(`Check Replies Error: ${data}`); });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) res.json({ ok: true, output });
-      else res.status(500).json({ error: 'Check replies failed', output });
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // Browser UI Scraper API
 let scrapingProcess = null;
@@ -622,18 +367,19 @@ let scrapeLogs = [];
 app.post('/api/scrape/start', (req, res) => {
   if (scrapingProcess) return res.status(400).json({error: 'Scraping is already in progress. Please wait for it to finish.'});
   
-  const { city, business, source, max_leads } = req.body;
+  const { city, business, source, max_leads, website_filter } = req.body;
   if (!city || !business || !source || !max_leads) {
     return res.status(400).json({error: 'Missing parameters'});
   }
   
-  scrapeLogs = [{type: 'i', msg: `Starting scrape job for ${business} in ${city} via ${source}...`}];
+  const wsFilter = website_filter || 'all';
+  scrapeLogs = [{type: 'i', msg: `Starting scrape job for ${business} in ${city} via ${source} (Website: ${wsFilter})...`}];
   
   try {
     const pyPath = path.join(__dirname, '..', '.venv_linux', 'bin', 'python');
     const pythonExecutable = require('fs').existsSync(pyPath) ? pyPath : 'python';
     
-    const args = ['scraper/run_scrapers.py', city, business, source, max_leads.toString()];
+    const args = ['scraper/run_scrapers.py', city, business, source, max_leads.toString(), wsFilter];
     
     scrapingProcess = spawn(pythonExecutable, args, {
       cwd: path.join(__dirname, '..'),

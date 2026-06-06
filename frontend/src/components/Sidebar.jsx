@@ -3,8 +3,6 @@ import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Search, 
-  Mail, 
-  FileText, 
   Users, 
   Kanban, 
   MessageCircle, 
@@ -17,9 +15,6 @@ export default function Sidebar() {
   const navItems = [
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={18} /> },
     { name: 'Scraper', path: '/scraper', icon: <Search size={18} /> },
-    { type: 'divider' },
-    { name: 'Emails', path: '/emails', icon: <Mail size={18} /> },
-    { name: 'Templates', path: '/templates', icon: <FileText size={18} /> },
     { type: 'divider' },
     { name: 'All Leads', path: '/leads', icon: <Users size={18} /> },
     { name: 'Pipeline', path: '/pipeline', icon: <Kanban size={18} /> },

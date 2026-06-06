@@ -167,14 +167,16 @@ def enrich_leads_with_emails():
         page = ctx.new_page()
 
         for lead in to_enrich:
-            lead_id = int(lead.get("id"))
+            lead_id = str(lead.get("id", ""))
+            if not lead_id:
+                continue
             name     = str(lead.get("Business Name","")).strip()
             website  = str(lead.get("Website","")).strip()
             maps_url = str(lead.get("Maps URL","")).strip()
             city     = str(lead.get("City","")).strip()
             email    = ""
 
-            logger.info(f"[{lead_id}] {name}")
+            logger.info(f"[{lead_id[:8]}] {name}")
 
             # 1. Website already in sheet
             if website and not email:

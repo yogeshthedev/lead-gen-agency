@@ -1,15 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { callApi } from '../services/api';
 import { Search, Play, AlertCircle, CheckCircle2 } from 'lucide-react';
 
+const TARGET_GROUPS = [
+  {
+    name: 'Priority 1 (High Paying)',
+    options: ['Interior Designers', 'Architects', 'Real Estate Consultants', 'Wedding Photographers', 'Event Planners', 'Coaching Institutes', 'CA Firms', 'Lawyers']
+  },
+  {
+    name: 'Priority 2',
+    options: ['Dental Clinics', 'Physiotherapy Clinics', 'Skin Clinics', 'Gyms', 'Beauty Salons', 'Travel Agencies']
+  }
+];
+
 export default function Scraper() {
-  const [city, setCity] = useState('Mumbai');
-  const [business, setBusiness] = useState('Dentists');
+  const [city, setCity] = useState('jaipur');
+  const [business, setBusiness] = useState('CA Firms');
   const [source, setSource] = useState('both');
   const [maxLeads, setMaxLeads] = useState(30);
+  const [websiteFilter, setWebsiteFilter] = useState('all');
   
   const [status, setStatus] = useState('idle'); // idle, running, done, error
   const [logs, setLogs] = useState([]);
+
+  const [showTargets, setShowTargets] = useState(false);
+  const targetRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (targetRef.current && !targetRef.current.contains(event.target)) {
+        setShowTargets(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     let interval;
@@ -49,13 +74,18 @@ export default function Scraper() {
     try {
       await callApi('/scrape/start', {
         method: 'POST',
-        body: JSON.stringify({ city, business, source, max_leads: parseInt(maxLeads) })
+        body: JSON.stringify({ city, business, source, max_leads: parseInt(maxLeads), website_filter: websiteFilter })
       });
     } catch (err) {
       setLogs(prev => [...prev, { type: 'e', msg: err.message }]);
       setStatus('error');
     }
   };
+
+  const filteredGroups = TARGET_GROUPS.map(g => ({
+    name: g.name,
+    options: g.options.filter(o => o.toLowerCase().includes(business.toLowerCase()))
+  })).filter(g => g.options.length > 0);
 
   return (
     <div className="scraper-page">
@@ -65,7 +95,7 @@ export default function Scraper() {
       </div>
 
       <div className="glass-panel p-6 mb-6">
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-5 gap-4 mb-6">
           <div className="input-group">
             <label className="input-label">City</label>
             <input 
@@ -75,14 +105,49 @@ export default function Scraper() {
               placeholder="e.g. Mumbai"
             />
           </div>
-          <div className="input-group">
+          <div className="input-group" ref={targetRef}>
             <label className="input-label">Business Type</label>
-            <input 
-              className="input-field" 
-              value={business} 
-              onChange={e => setBusiness(e.target.value)} 
-              placeholder="e.g. Dentists"
-            />
+            <div className="dropdown-container">
+              <input 
+                className="input-field" 
+                value={business} 
+                onChange={e => {
+                  setBusiness(e.target.value);
+                  setShowTargets(true);
+                }} 
+                onFocus={() => setShowTargets(true)}
+                placeholder="Search or type custom target..."
+              />
+              {showTargets && (
+                <div className="dropdown-menu">
+                  {filteredGroups.length > 0 ? (
+                    filteredGroups.map(group => (
+                      <div key={group.name}>
+                        <div className="dropdown-group-header">
+                          {group.name}
+                        </div>
+                        {group.options.map(opt => (
+                          <div 
+                            key={opt}
+                            className="dropdown-item"
+                            onClick={() => {
+                              setBusiness(opt);
+                              setShowTargets(false);
+                            }}
+                          >
+                            {opt}
+                          </div>
+                        ))}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="dropdown-item text-tertiary">
+                      Press 'Start Scraping' to use "{business}"
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <div className="input-group">
             <label className="input-label">Source</label>
@@ -104,6 +169,18 @@ export default function Scraper() {
               value={maxLeads} 
               onChange={e => setMaxLeads(e.target.value)} 
             />
+          </div>
+          <div className="input-group">
+            <label className="input-label">Website Filter</label>
+            <select 
+              className="input-field" 
+              value={websiteFilter} 
+              onChange={e => setWebsiteFilter(e.target.value)}
+            >
+              <option value="all">All Leads</option>
+              <option value="with_website">Only With Website</option>
+              <option value="without_website">Only Without Website</option>
+            </select>
           </div>
         </div>
 

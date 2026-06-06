@@ -225,7 +225,7 @@ def parse_listing(listing, city, business):
     }
 
 
-def scrape_and_save(city=None, business=None, max_leads=30):
+def scrape_and_save(city=None, business=None, max_leads=30, website_filter="all"):
     city     = city or TARGET_CITY
     business = business or TARGET_BUSINESS
     logger.info(f"Starting: {business} in {city}")
@@ -233,6 +233,18 @@ def scrape_and_save(city=None, business=None, max_leads=30):
     leads = scrape_justdial(city, business, max_leads)
     if not leads:
         logger.warning("No leads to save.")
+        return 0
+
+    # Apply website filter before saving
+    if website_filter == "with_website":
+        leads = [l for l in leads if l.get("Has Website") == "yes"]
+        logger.info(f"Website filter: keeping only leads WITH website ({len(leads)} leads)")
+    elif website_filter == "without_website":
+        leads = [l for l in leads if l.get("Has Website") != "yes"]
+        logger.info(f"Website filter: keeping only leads WITHOUT website ({len(leads)} leads)")
+
+    if not leads:
+        logger.warning("No leads remaining after website filter.")
         return 0
 
     init_db()
